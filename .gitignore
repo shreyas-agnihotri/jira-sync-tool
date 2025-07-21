@@ -1,9 +1,8 @@
-# Python cache files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Distribution / packaging
+*.so
 .Python
 build/
 develop-eggs/
@@ -22,29 +21,7 @@ wheels/
 *.egg
 MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# Environment files
+# Virtual environments
 .env
 .venv
 env/
@@ -53,25 +30,38 @@ ENV/
 env.bak/
 venv.bak/
 
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Thumbnails
-._*
-
-# Backup files
-*_backup.py
-*.bak
-*.tmp
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Log files
-*.log 
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JIRA Configuration (sensitive)
+jira_config.json
+*.key
+*.pem
+*.p12
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Test files
+test_*.py
+debug_*.py 

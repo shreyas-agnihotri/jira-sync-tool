@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+# Import compatibility fix for Python 3.13
+import compatibility_fix
+
+# Suppress SSL warnings for self-signed certificates
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 from jira import JIRA
 import json
 from datetime import datetime
@@ -14,10 +21,21 @@ import random
 # Configure logging
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Configuration Constants
-JIRA_URL = 'https://couchbasecloud.atlassian.net'
-JIRA_EMAIL = 'shreyas.agnihotri@couchbase.com'
-JIRA_API_TOKEN = 'ATATT3xFfGF0Lq9vN0mc9JdulEFU7PAZtrwoZP0c9DkDMp6pP5d0aTeo-EZzy5HVbp177iaMQk0ZMapQlrkSlGv84Nw7ND6ITdxcOuDxIJyjd1LxryhxDJGJhfqpHY-vWLjqNW_bSl8HUTZgDyQXdNNk9erfvR7GNvuceK27jnMTg-2sASK04IE=07E08722'
+# Configuration Constants (will be overridden by config manager)
+JIRA_URL = 'https://your-jira-instance.atlassian.net'
+JIRA_EMAIL = 'your-email@example.com'
+JIRA_API_TOKEN = 'your-api-token-here'
+
+# Global configuration
+jira_config = None
+
+def set_jira_config(config):
+    """Set JIRA configuration from config manager"""
+    global jira_config, JIRA_URL, JIRA_EMAIL, JIRA_API_TOKEN
+    jira_config = config
+    JIRA_URL = config.get('url', JIRA_URL)
+    JIRA_EMAIL = config.get('email', JIRA_EMAIL)
+    JIRA_API_TOKEN = config.get('api_token', JIRA_API_TOKEN)
 
 TARGET_DATE_FIELDS = [
     'PRD Due Date', 'PRD Review Due Date', 'Start date', 'Code Complete Target',
@@ -41,37 +59,53 @@ FIELD_MAPPINGS = {
     'customfield_12967': 'customfield_10064',
 }
 
+# Global output queue for GUI integration
+output_queue = None
+
+def set_output_queue(queue):
+    """Set the output queue for GUI integration"""
+    global output_queue
+    output_queue = queue
+
+def gui_print(message):
+    """Print to GUI if available, otherwise to console"""
+    global output_queue
+    if output_queue:
+        output_queue.put(message)
+    else:
+        print(message)
+
 def print_header(title: str, subtitle: str = ""):
     """Print a clean, professional header"""
-    print(f"\n{title}")
+    gui_print(f"\n{title}")
     if subtitle:
-        print(f"{subtitle}")
-    print("-" * len(title))
+        gui_print(f"{subtitle}")
+    gui_print("-" * len(title))
 
 def print_section(title: str):
     """Print a section header"""
-    print(f"\n{title}")
+    gui_print(f"\n{title}")
 
 def print_success(message: str):
     """Print success message with green color"""
-    print(f"\033[32m✓\033[0m {message}")
+    gui_print(f"\033[32m✓\033[0m {message}")
 
 def print_warning(message: str):
     """Print warning message with yellow color"""
-    print(f"\033[33m!\033[0m {message}")
+    gui_print(f"\033[33m!\033[0m {message}")
 
 def print_error(message: str):
     """Print error message with red color"""
-    print(f"\033[31m✗\033[0m {message}")
+    gui_print(f"\033[31m✗\033[0m {message}")
 
 def print_info(message: str):
     """Print info message"""
-    print(f"  {message}")
+    gui_print(f"  {message}")
 
 def print_verbose(message: str, verbose: bool = False):
     """Print verbose message only when verbose mode is enabled"""
     if verbose:
-        print(f"  {message}")
+        gui_print(f"  {message}")
 
 def print_progress(current: int, total: int, item: str = ""):
     """Print progress indicator"""
@@ -79,9 +113,9 @@ def print_progress(current: int, total: int, item: str = ""):
     bar_length = 20
     filled_length = int(bar_length * current // total) if total > 0 else 0
     bar = '█' * filled_length + '░' * (bar_length - filled_length)
-    print(f"\r  [{bar}] {percentage:5.1f}% ({current}/{total}) {item}", end='', flush=True)
+    gui_print(f"\r  [{bar}] {percentage:5.1f}% ({current}/{total}) {item}", end='', flush=True)
     if current == total:
-        print()  # New line when complete
+        gui_print()  # New line when complete
 
 class ExecutionLogger:
     """Handles execution logging to file"""
@@ -243,8 +277,9 @@ class JiraClient:
         raise Exception(f"Max retries ({max_retries}) exceeded")
 
     def _create_jira_client(self):
-        """Create a JIRA client with rate limiting"""
-        return JIRA(server=JIRA_URL, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
+        """Create a JIRA client with rate limiting, API v3, and SSL verification disabled for self-signed certs"""
+        return JIRA(server=JIRA_URL, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN), 
+                   options={'rest_api_version': '3', 'verify': False})
 
     def get_issue(self, issue_key: str):
         """Get issue with rate limiting"""

@@ -4,13 +4,14 @@ import os
 from jira import JIRA
 
 # Load configuration
-JIRA_URL = os.getenv('JIRA_URL', 'https://couchbasecloud.atlassian.net')
+JIRA_URL = os.getenv('JIRA_URL', 'https://your-jira-instance.atlassian.net')
 JIRA_EMAIL = os.getenv('JIRA_EMAIL')
 JIRA_API_TOKEN = os.getenv('JIRA_API_TOKEN')
 
 def check_for_reference(issue_key, search_term):
     """Check if an issue has any reference to a search term"""
-    jira = JIRA(server=JIRA_URL, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
+    jira = JIRA(server=JIRA_URL, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN), 
+           options={'rest_api_version': '3', 'verify': False})
     
     try:
         issue = jira.issue(issue_key, expand='names')
