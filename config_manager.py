@@ -107,9 +107,9 @@ class CredentialsDialog:
         # Create dialog
         self.dialog = tk.Toplevel(parent)
         self.dialog.title("JIRA Configuration")
-        self.dialog.geometry("500x600")  # Increased height even more to ensure buttons are visible
+        self.dialog.geometry("700x600")  # Increased width for better button spacing
         self.dialog.resizable(False, False)
-        self.dialog.minsize(500, 600)  # Set minimum size to ensure buttons are visible
+        self.dialog.minsize(700, 600)  # Set minimum size to ensure buttons are visible
         
         # Force the dialog to update its geometry
         self.dialog.update_idletasks()
@@ -140,17 +140,17 @@ class CredentialsDialog:
         
         # JIRA URL
         ttk.Label(form_frame, text="JIRA URL:", font=('SF Pro Display', 10, 'bold')).pack(anchor=tk.W, pady=(0, 5))
-        self.url_entry = ttk.Entry(form_frame, width=50)
+        self.url_entry = ttk.Entry(form_frame, width=70)
         self.url_entry.pack(fill=tk.X, pady=(0, 15))
         
         # Email
         ttk.Label(form_frame, text="Email:", font=('SF Pro Display', 10, 'bold')).pack(anchor=tk.W, pady=(0, 5))
-        self.email_entry = ttk.Entry(form_frame, width=50)
+        self.email_entry = ttk.Entry(form_frame, width=70)
         self.email_entry.pack(fill=tk.X, pady=(0, 15))
         
         # API Token
         ttk.Label(form_frame, text="API Token:", font=('SF Pro Display', 10, 'bold')).pack(anchor=tk.W, pady=(0, 5))
-        self.api_token_entry = ttk.Entry(form_frame, width=50, show="*")
+        self.api_token_entry = ttk.Entry(form_frame, width=70, show="*")
         self.api_token_entry.pack(fill=tk.X, pady=(0, 15))
         
         # Show/Hide password button
@@ -166,33 +166,38 @@ class CredentialsDialog:
                                      font=('SF Pro Display', 9))
         self.status_label.pack(anchor=tk.W, pady=(10, 0))
         
-        # Buttons frame - simple pack layout
+        # Buttons frame with better spacing
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=20)
         
-        # Left side buttons
-        left_frame = ttk.Frame(button_frame)
-        left_frame.pack(side=tk.LEFT)
+        # Configure button frame to center buttons
+        button_frame.columnconfigure(0, weight=1)  # Left spacer
+        button_frame.columnconfigure(1, weight=0)  # Test button
+        button_frame.columnconfigure(2, weight=0)  # Clear button
+        button_frame.columnconfigure(3, weight=1)  # Center spacer
+        button_frame.columnconfigure(4, weight=0)  # Cancel button
+        button_frame.columnconfigure(5, weight=0)  # Save button
+        button_frame.columnconfigure(6, weight=1)  # Right spacer
         
-        test_btn = ttk.Button(left_frame, text="🔍 Test Connection", 
+        # Test Connection button
+        test_btn = ttk.Button(button_frame, text="🔍 Test Connection", 
                               command=self.test_connection)
-        test_btn.pack(side=tk.LEFT, padx=(0, 10))
+        test_btn.grid(row=0, column=1, padx=(0, 10))
         
-        clear_btn = ttk.Button(left_frame, text="🗑️ Clear Credentials", 
+        # Clear Credentials button
+        clear_btn = ttk.Button(button_frame, text="🗑️ Clear Credentials", 
                                command=self.clear_credentials)
-        clear_btn.pack(side=tk.LEFT)
+        clear_btn.grid(row=0, column=2, padx=(0, 20))
         
-        # Right side buttons
-        right_frame = ttk.Frame(button_frame)
-        right_frame.pack(side=tk.RIGHT)
-        
-        save_btn = ttk.Button(right_frame, text="💾 Save", 
-                              command=self.save_config)
-        save_btn.pack(side=tk.RIGHT, padx=(10, 0))
-        
-        cancel_btn = ttk.Button(right_frame, text="❌ Cancel", 
+        # Cancel button
+        cancel_btn = ttk.Button(button_frame, text="❌ Cancel", 
                                 command=self.cancel)
-        cancel_btn.pack(side=tk.RIGHT)
+        cancel_btn.grid(row=0, column=4, padx=(20, 10))
+        
+        # Save button
+        save_btn = ttk.Button(button_frame, text="💾 Save", 
+                              command=self.save_config)
+        save_btn.grid(row=0, column=5)
         
         # Store reference to test button for later use
         self.test_btn = test_btn
